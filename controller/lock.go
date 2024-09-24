@@ -21,7 +21,15 @@ func CreateLock(c *gin.Context) {
 
 	db := config.DB()
 
-	// สร้าง Lock
+	// ตรวจสอบว่า Id ซ้ำหรือไม่
+	var existingLock entity.Locks
+	if err := db.Where("id = ?", lock.Id).First(&existingLock).Error; err == nil {
+		// ถ้าเจอ Lock ที่มี Id ซ้ำ
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ล็อคนี้มีอยู่แล้ว"})
+		return
+	}
+
+	// สร้าง Lock ใหม่
 	u := entity.Locks{
 		Id:     lock.Id,
 		Status: lock.Status,
